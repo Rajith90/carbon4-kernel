@@ -63,7 +63,7 @@ public class JDBCLogsDAO implements LogsDAO {
     public JDBCLogsDAO() {
         RegistryContext registryContext = RegistryContext.getBaseInstance();
         for (Mount mount : registryContext.getMounts()) {
-            for(RemoteConfiguration configuration : registryContext.getRemoteInstances()) {
+            for (RemoteConfiguration configuration : registryContext.getRemoteInstances()) {
                 if (configuration.getDbConfig() != null &&
                         mount.getInstanceId().equals(configuration.getId())) {
                     dbConfigs.put(mount.getPath(),
@@ -191,7 +191,7 @@ public class JDBCLogsDAO implements LogsDAO {
     }
 
     public List getLogList(String path, int action,
-                        String userName, Date from, Date to, boolean descending, DataAccessManager dataAccessManager)
+                           String userName, Date from, Date to, boolean descending, DataAccessManager dataAccessManager)
             throws RegistryException {
 
         // This is for fixing REGISTRY-1911
@@ -348,7 +348,7 @@ public class JDBCLogsDAO implements LogsDAO {
             throw new RegistryException("Failed to get Database product name ", e);
         }
 
-        if(conn == null) {
+        if (conn == null) {
             log.fatal("Failed to get Logs. Communications link failure. The connection to the database could not be acquired.");
             throw new RegistryException("Failed to get Logs. Communications link failure. The connection to the database could not be acquired.");
         }
@@ -360,8 +360,8 @@ public class JDBCLogsDAO implements LogsDAO {
         boolean paginated = false;
         int start = 0;
         int count = 0;
-        String sortOrder ="";
-        String sortBy  ="";
+        String sortOrder = "";
+
         MessageContext messageContext = null;
         //   enableApiPagination is the value of system property - enable.registry.api.paginating
         if (enableApiPagination == null || enableApiPagination.equals("true")) {
@@ -371,10 +371,10 @@ public class JDBCLogsDAO implements LogsDAO {
                 PaginationContext paginationContext = PaginationUtils.initPaginationContext(messageContext);
                 start = paginationContext.getStart();
                 count = paginationContext.getCount();
-                if(start == 0){
-                    start =1;
+                if (start == 0) {
+                    start = 1;
                 }
-                sortBy = paginationContext.getSortBy();
+
                 sortOrder = paginationContext.getSortOrder();
                 paginated = paginate;
             }
@@ -386,8 +386,13 @@ public class JDBCLogsDAO implements LogsDAO {
         boolean queryStarted = false;
         sql = addWherePart(resourcePath, queryStarted, sql, userName, from, to, action);
 
+        if (sortOrder != null && sortOrder.equals("ASC")) {
+            descending = false;
+        }
         if (descending) {
             sql = sql + " ORDER BY REG_LOGGED_TIME DESC";
+        } else {
+            sql = sql + " ORDER BY REG_LOGGED_TIME ASC";
         }
         try {
             if (enableApiPagination == null || enableApiPagination.equals("true")) {
